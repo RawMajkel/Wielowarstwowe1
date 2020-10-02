@@ -4,9 +4,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Moq;
 using Newtonsoft.Json;
+using NUnit.Framework;
 using YoutubeClient.Models;
 
 namespace YoutubeClient.Controllers
@@ -21,9 +24,25 @@ namespace YoutubeClient.Controllers
             _logger = logger;
         }
 
-        public async Task<IActionResult> Videos([FromQuery] string search)
+        /* 
+         * Test z użyciem nugeta Moq 
+         * Test w kontrolerze tylko żeby sprawdzić czy działa
+         */
+        [Test]
+        public void VideosTest()
         {
-            var url = String.IsNullOrEmpty(search) ? $"https://www.googleapis.com/youtube/v3/videos?part=snippet&chart=mostPopular&key=AIzaSyDKMM-U6gMdJM20D9KAFIrAlhdUchkBBI" : $"https://www.googleapis.com/youtube/v3/search?part=snippet&q={search}&key={ApiKey}";
+            var ml = new Mock<ILogger<HomeController>>();
+            var controller = new HomeController(ml.Object);
+
+            var result = controller.Videos().Result as ViewResult;
+            var data = result.Model as IEnumerable<Video>;
+
+            Assert.IsTrue(data?.Any() ?? false);
+        }
+
+        public async Task<IActionResult> Videos()
+        {
+            var url = $"https://www.googleapis.com/youtube/v3/videos?part=snippet&chart=mostPopular&key={ApiKey}";
             _logger.LogInformation($"url: {url}");
 
             var client = new HttpClient();
