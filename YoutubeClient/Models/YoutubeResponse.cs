@@ -6,8 +6,13 @@
 
         public class Item
         {
-            public string id { get; set; }
+            public Id id { get; set; }
             public Snippet snippet { get; set; }
+
+            public class Id
+            {
+                public string videoId { get; set; }
+            }
 
             public class Snippet
             {

@@ -29,20 +29,24 @@ namespace YoutubeClient.Controllers
          * Test w kontrolerze tylko żeby sprawdzić czy działa
          */
         [Test]
-        public void VideosTest()
+        public void VideosSearchTest()
         {
             var ml = new Mock<ILogger<HomeController>>();
             var controller = new HomeController(ml.Object);
 
-            var result = controller.Videos().Result as ViewResult;
+            var result = controller.Videos("trial bike").Result as ViewResult;
             var data = result.Model as IEnumerable<Video>;
 
             Assert.IsTrue(data?.Any() ?? false);
         }
 
-        public async Task<IActionResult> Videos()
+        [Route ("home/videos/{search}")]
+        public async Task<IActionResult> Videos(string search = "")
         {
-            var url = $"https://www.googleapis.com/youtube/v3/videos?part=snippet&chart=mostPopular&key={ApiKey}";
+            //var url = $"https://www.googleapis.com/youtube/v3/videos?part=snippet&chart=mostPopular&key={ApiKey}";
+            var url = $"https://www.googleapis.com/youtube/v3/search?part=snippet&q={search}&key={ApiKey}";
+
+
             _logger.LogInformation($"url: {url}");
 
             var client = new HttpClient();
@@ -55,7 +59,7 @@ namespace YoutubeClient.Controllers
 
                 var ytVideos = ytResponse.items.Select(n => new Video
                 {
-                    Id = n.id,
+                    Id = n.id.videoId,
                     Title = n.snippet.title,
                     Description = n.snippet.description
                 });
